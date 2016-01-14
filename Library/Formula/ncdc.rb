@@ -1,14 +1,15 @@
 class Ncdc < Formula
   desc "NCurses direct connect"
-  homepage "http://dev.yorhel.nl/ncdc"
-  url "http://dev.yorhel.nl/download/ncdc-1.19.1.tar.gz"
+  homepage "https://dev.yorhel.nl/ncdc"
+  url "https://dev.yorhel.nl/download/ncdc-1.19.1.tar.gz"
   sha256 "a6b23381434a47f7134d9ebdf5658fd06768f9b5de498c43e0fa00d1c7229d47"
 
   bottle do
     cellar :any
-    sha256 "ca94bbb642bde3040c7ff044416f1f4c317e987ec391a08d19e0eb3255cfe458" => :yosemite
-    sha256 "2534b7f72747615d2eb9989a2ea4147312cb604c7723b3421155f7b0837e8e71" => :mavericks
-    sha256 "1e362cd2a91f1a9a7bfe401e4665d33a8a35076097e8acb0153cadc67aea8b6c" => :mountain_lion
+    revision 2
+    sha256 "7cc72689567f3cee75a51f3b9b5a969252ff2ed87c94bf11fa761bee5519a8d0" => :el_capitan
+    sha256 "fe636cd7cab6c7222bbbe05e499fdf2e0918bf55eeb96d64a070d13c7e5e7bd9" => :yosemite
+    sha256 "903e7a502efff29bb8c5beac6dd249b99306fce915d66c0306fde008fc655b64" => :mavericks
   end
 
   head do
@@ -20,10 +21,10 @@ class Ncdc < Formula
 
   option "with-geoip", "Build with geoip support"
 
+  depends_on "pkg-config" => :build
   depends_on "glib"
   depends_on "sqlite"
-  depends_on "gnutls" => "with-p11-kit"
-  depends_on "pkg-config" => :build
+  depends_on "gnutls"
   depends_on "geoip" => :optional
 
   def install

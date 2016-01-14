@@ -3,34 +3,36 @@ require "language/go"
 class SyncthingInotify < Formula
   desc "File watcher intended for use with Syncthing"
   homepage "https://github.com/syncthing/syncthing-inotify"
-  url "https://github.com/syncthing/syncthing-inotify/archive/v0.6.5.tar.gz"
-  sha256 "430297896bb05396268fd29cc555eba6542b42263489784c9843f4daf625ac5c"
+  url "https://github.com/syncthing/syncthing-inotify/archive/v0.6.7.tar.gz"
+  sha256 "33f51b34906548fe69b4aab2dbbb24397b523b357d4c9137324c1fddda9022b0"
+  revision 1
+
+  head "https://github.com/syncthing/syncthing-inotify.git"
 
   bottle do
-    cellar :any
-    sha256 "30c9a5de4a72ccf8046aa58c70eb3d010575b675940c2251d34e3c1c01e28ff4" => :yosemite
-    sha256 "0d15a5a3157c4afe71fcecad6fa4dae504abf183036863d8e65f470414010edb" => :mavericks
-    sha256 "6ca9ddd5a10e9efd9c193abced9bbfc03e29c5305f6dd4b98ba0d1da3f6905cf" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "7dc11215aaa14312a14ef7c425e44598f5180ca86080d79f853818d441a8378c" => :el_capitan
+    sha256 "0b0377da01a38af5cfc7b8c91af83b47fa87838a3e647ab3f67d1b6c06fa77a2" => :yosemite
+    sha256 "dc103adff4ec6ef1c9d7d026187101c232154ca0a60352e9d6c6418fb48743f1" => :mavericks
   end
 
   depends_on "go" => :build
 
   go_resource "github.com/cenkalti/backoff" do
     url "https://github.com/cenkalti/backoff.git",
-        :revision => "6c45d6bc1e78d94431dff8fc28a99f20bafa355a" # not sure !
+      :revision => "4dc77674aceaabba2c7e3da25d4c823edfb73f99"
   end
 
   go_resource "github.com/zillode/notify" do
     url "https://github.com/Zillode/notify.git",
-      :revision => "f06b1e3b795091f2e1414067b08e5f07332cdb05"   # not sure !
+      :revision => "f06b1e3b795091f2e1414067b08e5f07332cdb05"
   end
 
   def install
     ENV["GOPATH"] = buildpath
-    ENV.append_path "PATH", buildpath
     bin_name = "syncthing-inotify"
     Language::Go.stage_deps resources, buildpath/"src"
-    system "go", "build", "-o", bin_name
+    system "go", "build", "-ldflags", "-w -X main.Version #{version}", "-o", bin_name
     bin.install bin_name
   end
 

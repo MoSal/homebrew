@@ -12,7 +12,7 @@ class FormulaVersions
   def initialize(formula)
     @name = formula.name
     @path = formula.path
-    @repository = formula.tap? ? HOMEBREW_LIBRARY.join("Taps", formula.tap) : HOMEBREW_REPOSITORY
+    @repository = formula.tap.path
     @entry_name = @path.relative_path_from(repository).to_s
   end
 
@@ -50,6 +50,17 @@ class FormulaVersions
         unless bottle.checksums.empty?
           map[f.pkg_version] << bottle.revision
         end
+      end
+    end
+    map
+  end
+
+  def revision_map(branch)
+    map = Hash.new { |h, k| h[k] = [] }
+    rev_list(branch) do |rev|
+      formula_at_revision(rev) do |f|
+        map[f.stable.version] << f.revision if f.stable
+        map[f.devel.version] << f.revision if f.devel
       end
     end
     map

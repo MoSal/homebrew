@@ -5,29 +5,25 @@ class Pandoc < Formula
 
   desc "Swiss-army knife of markup format conversion"
   homepage "http://pandoc.org"
-  url "https://hackage.haskell.org/package/pandoc-1.15.2.1/pandoc-1.15.2.1.tar.gz"
-  sha256 "60bcb0e65ecb63953dd26d5aacf1a5df83700d116062ffaeffe9edbc9be6df59"
+  url "https://hackage.haskell.org/package/pandoc-1.16.0.1/pandoc-1.16.0.1.tar.gz"
+  sha256 "211bc1a4f1beaaf888d82e4e67414a3984cf494b58be49e157a1c21d9a09db1a"
 
   head "https://github.com/jgm/pandoc.git"
 
   bottle do
-    sha256 "872d03107276a48edccba99db5da657010a67b8906a9b96c68f825440a2fcac0" => :el_capitan
-    sha256 "bb44b6757591f9ab42d0e53a7fd19373c5c9ac9eb7363849df285f248c336b5b" => :yosemite
-    sha256 "7fcd5821bc01589340a41e5b215c86b2a480599c6ec337c0397adfdd9c6b758e" => :mavericks
+    sha256 "b41aec13628331db94c3d6e49b3f57b7e3cc9d84262cdf9ec0995230e68c799b" => :el_capitan
+    sha256 "8745651aca1b3fd3727c1a80a4b1ee10084ac0b52300258b65635125686f5203" => :yosemite
+    sha256 "0478ec953e78f4aafc98fa298dea60bf26a8528db83246cca1c931f9f623c232" => :mavericks
   end
 
   depends_on "ghc" => :build
   depends_on "cabal-install" => :build
   depends_on "gmp"
 
-  setup_ghc_compilers
-
   def install
-    cabal_sandbox do
-      cabal_install "--only-dependencies"
-      cabal_install "--prefix=#{prefix}"
-    end
-    cabal_clean_lib
+    args = []
+    args << "--constraint=cryptonite -support_aesni" if MacOS.version <= :lion
+    install_cabal_package *args
     (bash_completion/"pandoc").write `#{bin}/pandoc --bash-completion`
   end
 
