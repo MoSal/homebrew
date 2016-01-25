@@ -224,17 +224,12 @@ class FormulaAuditor
       end
     end
 
-    if Object.const_defined?("GithubGistFormula") && formula.class < GithubGistFormula
-      problem "GithubGistFormula is deprecated, use Formula instead"
+    classes = %w[GithubGistFormula ScriptFileFormula AmazonWebServicesFormula]
+    klass = classes.find do |c|
+      Object.const_defined?(c) && formula.class < Object.const_get(c)
     end
 
-    if Object.const_defined?("ScriptFileFormula") && formula.class < ScriptFileFormula
-      problem "ScriptFileFormula is deprecated, use Formula instead"
-    end
-
-    if Object.const_defined?("AmazonWebServicesFormula") && formula.class < AmazonWebServicesFormula
-      problem "AmazonWebServicesFormula is deprecated, use Formula instead"
-    end
+    problem "#{klass} is deprecated, use Formula instead" if klass
   end
 
   # core aliases + tap alias names + tap alias full name
@@ -584,12 +579,18 @@ class FormulaAuditor
     return unless formula.tap # skip formula not from core or any taps
     return unless formula.tap.git? # git log is required
 
-    fv = FormulaVersions.new(formula)
+    fv = FormulaVersions.new(formula, :max_depth => 10)
     revision_map = fv.revision_map("origin/master")
     if (revisions = revision_map[formula.version]).any?
       problem "revision should not decrease" if formula.revision < revisions.max
-    else
-      problem "revision should be removed" unless formula.revision == 0
+    elsif formula.revision != 0
+      if formula.stable
+        if revision_map[formula.stable.version].empty? # check stable spec
+          problem "revision should be removed"
+        end
+      else # head/devel-only formula
+        problem "revision should be removed"
+      end
     end
   end
 

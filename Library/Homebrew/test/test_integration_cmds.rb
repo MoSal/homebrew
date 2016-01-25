@@ -4,6 +4,16 @@ require "core_formula_repository"
 require "fileutils"
 
 class IntegrationCommandTests < Homebrew::TestCase
+  def setup
+    @cmd_id_index = 0 # Assign unique IDs to invocations of `cmd_output`.
+  end
+
+  def cmd_id_from_args(args)
+    args_pretty = args.join(" ").gsub(TEST_TMPDIR, "@TMPDIR@")
+    test_pretty = "#{self.class.name}\##{name}.#{@cmd_id_index += 1}"
+    "[#{test_pretty}] brew #{args_pretty}"
+  end
+
   def cmd_output(*args)
     # 1.8-compatible way of writing def cmd_output(*args, **env)
     env = args.last.is_a?(Hash) ? args.pop : {}
@@ -18,7 +28,7 @@ class IntegrationCommandTests < Homebrew::TestCase
     cmd_args += args
     Bundler.with_original_env do
       ENV["HOMEBREW_BREW_FILE"] = HOMEBREW_PREFIX/"bin/brew"
-      ENV["HOMEBREW_INTEGRATION_TEST"] = args.join " "
+      ENV["HOMEBREW_INTEGRATION_TEST"] = cmd_id_from_args(args)
       ENV["HOMEBREW_TEST_TMPDIR"] = TEST_TMPDIR
       env.each_pair { |k,v| ENV[k] = v }
 
@@ -104,6 +114,11 @@ class IntegrationCommandTests < Homebrew::TestCase
   def test_help
     assert_match "Example usage:",
                  cmd("help")
+  end
+
+  def test_config
+    assert_match "HOMEBREW_VERSION: #{HOMEBREW_VERSION}",
+                 cmd("config")
   end
 
   def test_install
@@ -217,6 +232,96 @@ class IntegrationCommandTests < Homebrew::TestCase
   def test_doctor
     assert_match "This is an integration test",
                  cmd_fail("doctor", "check_integration_test")
+  end
+
+  def test_command
+    assert_equal "#{HOMEBREW_LIBRARY_PATH}/cmd/info.rb",
+                 cmd("command", "info")
+
+    assert_match "Unknown command",
+                 cmd_fail("command", "I-don't-exist")
+  end
+
+  def test_commands
+    assert_match "Built-in commands",
+                 cmd("commands")
+  end
+
+  def test_cat
+    formula_file = CoreFormulaRepository.new.formula_dir/"testball.rb"
+    content = <<-EOS.undent
+      class Testball < Formula
+        url "https://example.com/testball-0.1.tar.gz"
+      end
+    EOS
+    formula_file.write content
+
+    assert_equal content.chomp, cmd("cat", "testball")
+  ensure
+    formula_file.unlink
+  end
+
+  def test_desc
+    formula_file = CoreFormulaRepository.new.formula_dir/"testball.rb"
+    content = <<-EOS.undent
+      class Testball < Formula
+        desc "Some test"
+        url "https://example.com/testball-0.1.tar.gz"
+      end
+    EOS
+    formula_file.write content
+
+    assert_equal "testball: Some test", cmd("desc", "testball")
+  ensure
+    formula_file.unlink
+  end
+
+  def test_edit
+    (HOMEBREW_REPOSITORY/".git").mkpath
+    formula_file = CoreFormulaRepository.new.formula_dir/"testball.rb"
+    content = <<-EOS.undent
+      class Testball < Formula
+        url "https://example.com/testball-0.1.tar.gz"
+        # something here
+      end
+    EOS
+    formula_file.write content
+
+    assert_match "# something here",
+                 cmd("edit", "testball", {"HOMEBREW_EDITOR" => "/bin/cat"})
+  ensure
+    formula_file.unlink
+    (HOMEBREW_REPOSITORY/".git").unlink
+  end
+
+  def test_sh
+    assert_match "Your shell has been configured",
+                 cmd("sh", {"SHELL" => "/usr/bin/true"})
+  end
+
+  def test_info
+    formula_file = CoreFormulaRepository.new.formula_dir/"testball.rb"
+    content = <<-EOS.undent
+      class Testball < Formula
+        url "https://example.com/testball-0.1.tar.gz"
+      end
+    EOS
+    formula_file.write content
+
+    assert_match "testball: stable 0.1",
+                 cmd("info", "testball")
+  ensure
+    formula_file.unlink
+  end
+
+  def test_tap_readme
+    (HOMEBREW_LIBRARY/"Taps").mkpath
+    assert_match "brew install homebrew/foo/<formula>",
+                 cmd("tap-readme", "foo", "--verbose")
+    readme = HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-foo/README.md"
+    assert readme.exist?, "The README should be created"
+  ensure
+    (HOMEBREW_LIBRARY/"Taps").rmtree
   end
 
   def test_custom_command

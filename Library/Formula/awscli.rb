@@ -1,15 +1,15 @@
 class Awscli < Formula
   desc "Official Amazon AWS command-line interface"
   homepage "https://aws.amazon.com/cli/"
-  url "https://pypi.python.org/packages/source/a/awscli/awscli-1.9.18.tar.gz"
-  mirror "https://github.com/aws/aws-cli/archive/1.9.18.tar.gz"
-  sha256 "c33a8bb77cc305dead1f45cac8c2be618546bd3b4dd5f1e6be093432977c5b23"
+  url "https://pypi.python.org/packages/source/a/awscli/awscli-1.10.0.tar.gz"
+  mirror "https://github.com/aws/aws-cli/archive/1.10.0.tar.gz"
+  sha256 "c0f016eacfc05bedeb4cad22846c44a3bc301ea5d433559e50be4f4aa44a353d"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c4a981f42a6767354b4c3db4340fd6484a0e5978ca04a3c51bbd2531072e2a72" => :el_capitan
-    sha256 "59fb86533dda0b3dd52375976acb3a67dcc186c23c3af5831fe5520630eb5685" => :yosemite
-    sha256 "3c3fc3186f86f79212d2fc7afed0e24159138a036c48fb3ebdb57cf7ac72d080" => :mavericks
+    sha256 "cc74fefe12bbd4599c4c6f843795eb0841d423215947f71df2351c8239a0a85e" => :el_capitan
+    sha256 "faaffad321b9164622071c31f6efef39041879a2c167677d9cc1a42aacd9c569" => :yosemite
+    sha256 "90f2bc98f7e18cf73180d6bb3654b006413b7128484ea9777a0cf4afbbf30665" => :mavericks
   end
 
   head do
@@ -39,8 +39,8 @@ class Awscli < Formula
   end
 
   resource "colorama" do
-    url "https://pypi.python.org/packages/source/c/colorama/colorama-0.3.6.tar.gz"
-    sha256 "ec9efcccb086a1d727876384f94ee6358d2f3f096688c1ba18b0f318f2b453b5"
+    url "https://pypi.python.org/packages/source/c/colorama/colorama-0.3.3.tar.gz"
+    sha256 "eb21f2ba718fbf357afdfdf6f641ab393901c7ca8d9f37edd0bee4806ffa269c"
   end
 
   resource "jmespath" do
@@ -49,8 +49,8 @@ class Awscli < Formula
   end
 
   resource "botocore" do
-    url "https://pypi.python.org/packages/source/b/botocore/botocore-1.3.18.tar.gz"
-    sha256 "6a21bbf3a569fd32ae9b672e6732462ac0f75a4bc8b21f051d367a5f79521211"
+    url "https://pypi.python.org/packages/source/b/botocore/botocore-1.3.22.tar.gz"
+    sha256 "02a6d320b09179bc5dcbafd4be732d9431bfebf5bed6d6b6508eca96b599a399"
   end
 
   resource "docutils" do
